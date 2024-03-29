@@ -1,15 +1,18 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const sendMessage = async (req, res) => {
   try {
     const { message } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
+    // console.log(req.params);
 
     let conversation = await Conversation.findOne({
-      partipants: { $all: [senderId, receiverId] },
+      participants: { $all: [senderId, receiverId] },
     });
+    // console.log(conversation);
 
     if (!conversation) {
       conversation = await Conversation.create({
@@ -22,7 +25,6 @@ export const sendMessage = async (req, res) => {
       receiverId,
       message,
     });
-    ``;
 
     if (newMessage) {
       conversation.messages.push(newMessage._id);
@@ -33,9 +35,15 @@ export const sendMessage = async (req, res) => {
 
     await Promise.all([conversation.save(), newMessage.save()]);
 
-    if (newMessage) {
-      conversation.messages.push(newMessage._id);
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      // io.to().emit() used to send events to specific clients
+      io.to(receiverSocketId).emit("newMessage", newMessage);
     }
+
+    // if (newMessage) {
+    //   conversation.messages.push(newMessage._id);
+    // }
 
     res.status(201).json(newMessage);
   } catch (error) {
