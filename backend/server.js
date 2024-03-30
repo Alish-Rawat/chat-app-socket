@@ -19,9 +19,9 @@ app.use(express.json()); // to parse the incoming requests with JSON payloads fr
 
 app.use(cookieParser()); //  to use cookies in app
 
-app.get("/", (req, res) => {
-  res.send("Express is Running");
-});
+// app.get("/", (req, res) => {
+//   res.send("Express is Running");
+// });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
