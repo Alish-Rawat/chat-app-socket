@@ -9,10 +9,14 @@ const useGetConversations = () => {
     const getConversations = async () => {
       setLoading(true);
       try {
-        const res = await fetch("api/users");
+        const res = await fetch("api/users", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        });
         const data = await res.json();
-        console.log(data, "asd");
-        if (data.errro) {
+        console.log(data);
+        if (data.error) {
           throw new Error(data.error);
         }
         setConversations(data);
